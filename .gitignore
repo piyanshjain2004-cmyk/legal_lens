@@ -6,3 +6,4 @@ vector_db/*.json
 models/matplotlib_cache/
 models/cache/
 .env
+models/**/*.safetensors
