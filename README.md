@@ -4,15 +4,6 @@
 
 Build a simple, clean, beginner-friendly AI Legal Assistant for Indian laws. This is a final-year college project, so prioritize readability, maintainability, and clear explanations over enterprise-level architecture.
 
-## Rules
-
-* Keep the project simple.
-* Do NOT over-engineer.
-* Avoid unnecessary frameworks.
-* Every file should have a single responsibility.
-* Add comments explaining important logic.
-* Use only free and open-source tools.
-
 ## Tech Stack
 
 * Python 3.12+
