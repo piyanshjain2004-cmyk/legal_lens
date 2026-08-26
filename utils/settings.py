@@ -8,7 +8,7 @@ CACHE_FOLDER = MODELS_FOLDER / "cache"
 EMBEDDING_MODEL_FOLDER = MODELS_FOLDER / "embedding_model"
 ANSWER_MODEL_FOLDER = MODELS_FOLDER / "answer_model"
 EMBEDDING_MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
-ANSWER_MODEL_NAME = "google/flan-t5-small"
+ANSWER_MODEL_NAME = "Qwen/Qwen2.5-1.5B-Instruct"
 
 
 def setup_environment() -> None:

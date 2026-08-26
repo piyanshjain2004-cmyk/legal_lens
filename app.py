@@ -16,6 +16,20 @@ def home():
     return render_template("index.html")
 
 
+@app.route("/build", methods=["POST"])
+def build():
+    try:
+        total_chunks = build_vector_store()
+        return jsonify(
+            {
+                "success": True,
+                "message": f"Knowledge base ready with {total_chunks} chunks.",
+            }
+        )
+    except Exception as error:
+        return jsonify({"success": False, "message": str(error)}), 400
+
+
 @app.route("/rebuild", methods=["POST"])
 def rebuild():
     try:
@@ -28,6 +42,7 @@ def rebuild():
         )
     except Exception as error:
         return jsonify({"success": False, "message": str(error)}), 400
+
 
 @app.route("/ask", methods=["POST"])
 def ask():
@@ -55,6 +70,7 @@ def ask():
         ), 400
     except Exception as error:
         return jsonify({"success": False, "message": str(error)}), 500
+
 
 if __name__ == "__main__":
     app.run(debug=False, use_reloader=False)

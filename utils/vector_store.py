@@ -10,89 +10,325 @@ from utils.text_splitter import split_pages
 
 
 BASE_FOLDER = Path(__file__).resolve().parent.parent
+
 DATA_FOLDER = BASE_FOLDER / "data" / "law_pdfs"
 VECTOR_FOLDER = BASE_FOLDER / "vector_db"
+
 INDEX_FILE = VECTOR_FOLDER / "index.faiss"
 CHUNKS_FILE = VECTOR_FOLDER / "chunks.json"
 VERSION_FILE = VECTOR_FOLDER / "version.txt"
+
 INDEX_VERSION = "2"
 
 
+# ---------------------------------------------------------
+# Build vector store
+# ---------------------------------------------------------
+
 def build_vector_store() -> int:
-    if INDEX_FILE.exists() and CHUNKS_FILE.exists() and VERSION_FILE.exists():
-        if VERSION_FILE.read_text(encoding="utf-8").strip() == INDEX_VERSION:
-            with CHUNKS_FILE.open("r", encoding="utf-8") as file:
+
+    if (
+        INDEX_FILE.exists()
+        and CHUNKS_FILE.exists()
+        and VERSION_FILE.exists()
+    ):
+
+        if (
+            VERSION_FILE.read_text(
+                encoding="utf-8"
+            ).strip()
+            == INDEX_VERSION
+        ):
+
+            with CHUNKS_FILE.open(
+                "r",
+                encoding="utf-8",
+            ) as file:
+
                 return len(json.load(file))
 
     return rebuild_vector_store()
 
 
+# ---------------------------------------------------------
+# Rebuild vector store
+# ---------------------------------------------------------
+
 def rebuild_vector_store() -> int:
+
     pages = load_pdfs_from_folder(DATA_FOLDER)
 
     if not pages:
-        raise ValueError("No readable PDF text found in data/law_pdfs.")
+        raise ValueError(
+            "No readable PDF text found in data/law_pdfs."
+        )
 
     chunks = split_pages(pages)
 
     if not chunks:
-        raise ValueError("PDFs were found, but no text chunks could be created.")
+        raise ValueError(
+            "PDFs were found, but no text chunks could be created."
+        )
 
-    texts = [str(chunk["text"]) for chunk in chunks]
+    texts = [
+        str(chunk["text"])
+        for chunk in chunks
+    ]
+
     embeddings = create_embeddings(texts)
 
-    index = faiss.IndexFlatIP(embeddings.shape[1])
+    index = faiss.IndexFlatIP(
+        embeddings.shape[1]
+    )
+
     index.add(embeddings)
 
-    VECTOR_FOLDER.mkdir(exist_ok=True)
-    faiss.write_index(index, str(INDEX_FILE))
+    VECTOR_FOLDER.mkdir(
+        exist_ok=True
+    )
 
-    with CHUNKS_FILE.open("w", encoding="utf-8") as file:
-        json.dump(chunks, file, ensure_ascii=False, indent=2)
+    faiss.write_index(
+        index,
+        str(INDEX_FILE),
+    )
 
-    VERSION_FILE.write_text(INDEX_VERSION, encoding="utf-8")
+    with CHUNKS_FILE.open(
+        "w",
+        encoding="utf-8",
+    ) as file:
+
+        json.dump(
+            chunks,
+            file,
+            ensure_ascii=False,
+            indent=2,
+        )
+
+    VERSION_FILE.write_text(
+        INDEX_VERSION,
+        encoding="utf-8",
+    )
 
     return len(chunks)
 
 
+# ---------------------------------------------------------
+# Chunk count
+# ---------------------------------------------------------
+
 def get_chunk_count() -> int:
-    if CHUNKS_FILE.exists():
-        with CHUNKS_FILE.open("r", encoding="utf-8") as file:
-            return len(json.load(file))
 
-    return 0
+    if not CHUNKS_FILE.exists():
+        return 0
+
+    with CHUNKS_FILE.open(
+        "r",
+        encoding="utf-8",
+    ) as file:
+
+        return len(json.load(file))
 
 
-def load_vector_store() -> tuple[faiss.Index, list[dict[str, str | int]]]:
-    if not INDEX_FILE.exists() or not CHUNKS_FILE.exists():
-        raise FileNotFoundError("Knowledge base not found. Please build it first.")
+# ---------------------------------------------------------
+# Load vector store
+# ---------------------------------------------------------
 
-    index = faiss.read_index(str(INDEX_FILE))
+def load_vector_store():
 
-    with CHUNKS_FILE.open("r", encoding="utf-8") as file:
+    if (
+        not INDEX_FILE.exists()
+        or not CHUNKS_FILE.exists()
+    ):
+
+        raise FileNotFoundError(
+            "Knowledge base not found. "
+            "Please build it first."
+        )
+
+    index = faiss.read_index(
+        str(INDEX_FILE)
+    )
+
+    with CHUNKS_FILE.open(
+        "r",
+        encoding="utf-8",
+    ) as file:
+
         chunks = json.load(file)
 
     return index, chunks
 
 
-def search_similar_chunks(question: str, top_k: int = 5) -> list[dict[str, str]]:
+# ---------------------------------------------------------
+# Query expansion
+# ---------------------------------------------------------
+
+def expand_legal_query(question: str) -> str:
+
+    question_lower = question.lower()
+
+    expansion_terms = []
+
+    # Property ownership / possession
+    if (
+        "property" in question_lower
+        or "land" in question_lower
+        or "house" in question_lower
+        or "ownership" in question_lower
+    ):
+
+        expansion_terms.extend(
+            [
+                "property ownership",
+                "ownership dispute",
+                "right to property",
+                "possession of property",
+                "claim to property",
+                "property dispute",
+                "immovable property",
+            ]
+        )
+
+    # Claim / objection
+    if (
+        "claim" in question_lower
+        or "claims" in question_lower
+        or "claimed" in question_lower
+    ):
+
+        expansion_terms.extend(
+            [
+                "claim or objection",
+                "person claiming property",
+                "establish claim",
+                "claimant",
+                "interest in property",
+            ]
+        )
+
+    # Attachment
+    if (
+        "attach" in question_lower
+        or "attachment" in question_lower
+    ):
+
+        expansion_terms.extend(
+            [
+                "attachment of property",
+                "claim or objection to attachment",
+            ]
+        )
+
+    # Possession
+    if (
+        "possession" in question_lower
+        or "possess" in question_lower
+    ):
+
+        expansion_terms.extend(
+            [
+                "restore possession",
+                "dispute concerning possession",
+                "right to possession",
+            ]
+        )
+
+    # Remove duplicate terms while preserving order
+    unique_terms = []
+
+    for term in expansion_terms:
+
+        if term not in unique_terms:
+            unique_terms.append(term)
+
+    if not unique_terms:
+        return question
+
+    return (
+        question
+        + "\n\nLegal context: "
+        + ", ".join(unique_terms)
+    )
+
+
+# ---------------------------------------------------------
+# Search similar chunks
+# ---------------------------------------------------------
+
+def search_similar_chunks(
+    question: str,
+    top_k: int = 5,
+) -> list[dict[str, str]]:
+
     index, chunks = load_vector_store()
 
-    question_embedding = np.array([create_embedding(question)], dtype="float32")
-    scores, positions = index.search(question_embedding, top_k)
+    # -----------------------------------------------------
+    # Expand the user's natural-language question
+    # -----------------------------------------------------
+
+    search_query = expand_legal_query(
+        question
+    )
+
+    print(
+        "\n========== SEARCH QUERY =========="
+    )
+
+    print(search_query)
+
+    print(
+        "==================================\n"
+    )
+
+    # -----------------------------------------------------
+    # Create question embedding
+    # -----------------------------------------------------
+
+    question_embedding = np.array(
+        [
+            create_embedding(
+                search_query
+            )
+        ],
+        dtype="float32",
+    )
+
+    # -----------------------------------------------------
+    # FAISS search
+    # -----------------------------------------------------
+
+    scores, positions = index.search(
+        question_embedding,
+        top_k,
+    )
 
     results: list[dict[str, str]] = []
 
-    for score, position in zip(scores[0], positions[0]):
+    # -----------------------------------------------------
+    # Convert FAISS results
+    # -----------------------------------------------------
+
+    for score, position in zip(
+        scores[0],
+        positions[0],
+    ):
+
         if position == -1:
             continue
 
         chunk = chunks[int(position)]
+
         results.append(
             {
-                "text": str(chunk["text"]),
-                "source": str(chunk["source"]),
-                "page": str(chunk["page"]),
+                "text": str(
+                    chunk["text"]
+                ),
+                "source": str(
+                    chunk["source"]
+                ),
+                "page": str(
+                    chunk["page"]
+                ),
                 "score": f"{float(score):.3f}",
             }
         )

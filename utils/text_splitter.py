@@ -1,15 +1,42 @@
 import re
 
 
+CHUNK_SIZE = 1000
+CHUNK_OVERLAP = 150
+
+
 def clean_text(text: str) -> str:
-    text = re.sub(r"[_]{3,}", " ", text)
-    text = re.sub(r"\s+", " ", text)
+    """
+    Clean extracted PDF text while preserving useful paragraph
+    and section boundaries.
+    """
+
+    text = text.replace("\r\n", "\n")
+    text = text.replace("\r", "\n")
+
+    # Remove repeated underscores often produced by PDF extraction.
+    text = re.sub(r"_{3,}", " ", text)
+
+    # Normalize spaces/tabs but preserve newlines.
+    text = re.sub(r"[ \t]+", " ", text)
+
+    # Remove excessive blank lines.
+    text = re.sub(r"\n{3,}", "\n\n", text)
+
     return text.strip()
 
 
-def split_text(text: str, chunk_size: int = 800, overlap: int = 150) -> list[str]:
+def split_text(
+    text: str,
+    chunk_size: int = CHUNK_SIZE,
+    overlap: int = CHUNK_OVERLAP,
+) -> list[str]:
+
     if chunk_size <= 0:
         raise ValueError("chunk_size must be greater than zero.")
+
+    if overlap < 0:
+        raise ValueError("overlap cannot be negative.")
 
     if overlap >= chunk_size:
         raise ValueError("overlap must be smaller than chunk_size.")
@@ -19,24 +46,82 @@ def split_text(text: str, chunk_size: int = 800, overlap: int = 150) -> list[str
     if not cleaned_text:
         return []
 
-    chunks: list[str] = []
-    start = 0
+    # Split into sentences while keeping legal text readable.
+    sentences = re.split(
+        r"(?<=[.!?])\s+",
+        cleaned_text,
+    )
 
-    while start < len(cleaned_text):
-        end = start + chunk_size
-        chunks.append(cleaned_text[start:end])
-        start = end - overlap
+    chunks: list[str] = []
+    current_sentences: list[str] = []
+    current_length = 0
+
+    for sentence in sentences:
+
+        sentence = sentence.strip()
+
+        if not sentence:
+            continue
+
+        sentence_length = len(sentence)
+
+        # If adding this sentence would exceed the chunk size,
+        # finalize the current chunk first.
+        if (
+            current_sentences
+            and current_length + sentence_length + 1 > chunk_size
+        ):
+            chunk = " ".join(current_sentences).strip()
+
+            if chunk:
+                chunks.append(chunk)
+
+            # Keep the last few sentences as overlap.
+            overlap_sentences: list[str] = []
+            overlap_length = 0
+
+            for previous in reversed(current_sentences):
+
+                if overlap_length + len(previous) + 1 > overlap:
+                    break
+
+                overlap_sentences.insert(0, previous)
+                overlap_length += len(previous) + 1
+
+            current_sentences = overlap_sentences
+            current_length = overlap_length
+
+        current_sentences.append(sentence)
+        current_length += sentence_length + 1
+
+    # Add remaining text.
+    if current_sentences:
+
+        chunk = " ".join(current_sentences).strip()
+
+        if chunk:
+            chunks.append(chunk)
 
     return chunks
 
 
-def split_pages(pages: list[dict[str, str | int]]) -> list[dict[str, str | int]]:
+def split_pages(
+    pages: list[dict[str, str | int]],
+) -> list[dict[str, str | int]]:
+
     chunks: list[dict[str, str | int]] = []
 
     for page in pages:
-        page_chunks = split_text(str(page["text"]))
 
-        for chunk_number, chunk_text in enumerate(page_chunks, start=1):
+        page_text = str(page["text"])
+
+        page_chunks = split_text(page_text)
+
+        for chunk_number, chunk_text in enumerate(
+            page_chunks,
+            start=1,
+        ):
+
             chunks.append(
                 {
                     "text": chunk_text,

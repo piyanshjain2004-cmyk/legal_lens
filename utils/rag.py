@@ -1,162 +1,187 @@
 from functools import lru_cache
 
+from transformers import AutoModelForCausalLM, AutoTokenizer
+
 from utils.settings import ANSWER_MODEL_FOLDER, ANSWER_MODEL_NAME, setup_environment
+from utils.vector_store import search_similar_chunks
 
 setup_environment()
 
-from transformers import pipeline
-
-from utils.vector_store import search_similar_chunks
+RELEVANCE_THRESHOLD = 0.35
+RETRIEVAL_TOP_K = 10
+MODEL_CONTEXT_CHUNKS = 3
+MAX_CHUNK_CHARS = 900
 
 
 @lru_cache(maxsize=1)
 def get_answer_model():
-    """
-    Loads the text2text-generation pipeline model.
-    Uses @lru_cache to load the model only once.
-    """
     model_path = ANSWER_MODEL_FOLDER if ANSWER_MODEL_FOLDER.exists() else ANSWER_MODEL_NAME
-    return pipeline("text2text-generation", model=str(model_path))
+
+    tokenizer = AutoTokenizer.from_pretrained(
+        str(model_path),
+        fix_mistral_regex=True,
+    )
+
+    model = AutoModelForCausalLM.from_pretrained(
+        str(model_path),
+        dtype="auto",
+    )
+
+    return tokenizer, model
 
 
-def make_prompt(question: str, sources: list[dict[str, str]]) -> str:
-    """
-    Creates a prompt for the language model with the given question and sources.
-    Includes a one-shot example to guide the model's output format and style.
-    """
-    context = "\n\n".join(source["text"][:500] for source in sources)
-
-    # A one-shot example to guide the model.
-    example_context = "134. Duty of driver in case of accident and injury to a person.—When any person is injured... as a result of an accident in which a motor vehicle is involved, the driver of the vehicle... shall—(a) take all reasonable steps to secure medical attention for the injured person... (b) give on demand by a police officer any information required by him..."
-    example_question = "What should I do if I'm in a car accident?"
-    example_answer = """Short answer:
-If you are in an accident, you must stop, help anyone who is injured, and report the accident to the police.
-
-Steps or explanation:
-1. Take all reasonable steps to get medical help for any injured person.
-2. If a police officer asks for information, you must provide it.
-3. Report the accident to the police as soon as you can.
-
-Relevant law:
-The Motor Vehicles Act, Section 134, states the duties of a driver in an accident."""
-
-    # The final prompt for the user's question
-    final_prompt = f"""You are a helpful legal information assistant. Answer the question based only on the provided context. Do not use outside knowledge.
-If the context doesn't contain the answer, say "The provided documents do not contain enough information to answer this question."
-Provide the answer in simple language and use the following format:
-Short answer:
-Steps or explanation:
-Relevant law:
-
----
-EXAMPLE
-
-Context:
-{example_context}
-
-Question:
-{example_question}
-
-Answer:
-{example_answer}
-
----
-TASK
-
-Context:
-{context}
-
-Question:
-{question}
-
-Answer:
-"""
-    return final_prompt.strip()
-
-def is_stolen_phone_question(question: str) -> bool:
-    """
-    Checks if a question is about a stolen phone using keyword matching.
-    This is a special case to provide a canned, high-quality answer.
-    """
-    text = question.lower()
-    phone_words = ["phone", "mobile", "cell"]
-    theft_words = ["stolen", "lost", "theft", "snatched", "snatching", "robbed"]
-    return any(word in text for word in phone_words) and any(word in text for word in theft_words)
-
-
-def answer_stolen_phone(sources: list[dict[str, str]]) -> str:
-    """
-    Generates a canned answer for stolen phone questions, including
-    the top 3 unique sources found.
-    """
-    source_names = []
+def prepare_context(sources):
+    context = []
 
     for source in sources:
-        source_name = f"{source['source']}, page {source['page']}"
+        text = str(source.get("text", "")).strip()
 
-        if source_name not in source_names:
-            source_names.append(source_name)
+        if not text:
+            continue
 
-    source_text = "\n".join(f"- {source_name}" for source_name in source_names[:3])
+        if len(text) > MAX_CHUNK_CHARS:
+            text = text[:MAX_CHUNK_CHARS]
+            last_period = text.rfind(".")
 
-    return f"""
-Short answer:
-If your phone is stolen, first protect your accounts and SIM, then report the theft to the police.
+            if last_period >= MAX_CHUNK_CHARS * 0.5:
+                text = text[:last_period + 1]
 
-Steps you can take:
-1. Call your mobile network provider and block the SIM card.
-2. Change passwords for important accounts linked to the phone, like email, banking, UPI, and social media.
-3. Use Find My Device or Find My iPhone to lock the phone and erase data if needed.
-4. Note your phone number, IMEI number, model name, bill details, and last known location.
-5. File a police complaint or FIR for theft or snatching.
-6. Keep the complaint copy safely because it may be needed for insurance, SIM replacement, or phone blocking.
+        context.append(text)
 
-Relevant law:
-The sources found mention stolen communication devices under the Information Technology Act and theft or snatching under Bharatiya Nyaya Sanhita. These sources support that a stolen mobile phone can be treated as stolen property or a stolen communication device.
-
-Sources matched:
-{source_text}
-
-This is general legal information only and not professional legal advice.
-""".strip()
+    return "\n\n".join(context)
 
 
-def answer_question(question: str) -> dict[str, object]:
-    """
-    Answers a question using the RAG pipeline.
-    1. Searches for similar text chunks in the vector store.
-    2. Handles special cases (e.g., stolen phone).
-    3. Generates a prompt and gets an answer from the language model.
-    """
-    sources = search_similar_chunks(question, top_k=5)
+def build_prompt(question, sources):
+    context = prepare_context(sources)
 
-    if not sources:
+    return [
+        {
+            "role": "system",
+            "content": (
+                "You are a legal information assistant specializing in Indian law. "
+                "Answer the user's question using only the provided legal context. "
+                "Do not invent laws, sections, procedures, penalties, facts, or legal "
+                "advice. If the context does not contain enough information, say so. "
+                "Give a direct, clear and complete answer in natural language. "
+                "Mention section numbers only when supported by the context. "
+                "Do not mention sources, pages, scores, documents, or retrieval. "
+                "Do not copy the context word-for-word. "
+                "This is general legal information, not professional legal advice."
+            ),
+        },
+        {
+            "role": "user",
+            "content": f"Legal context:\n{context}\n\nQuestion:\n{question}",
+        },
+    ]
+
+
+def clean_answer(text):
+    text = str(text).strip()
+
+    for prefix in ("Answer:", "answer:", "Response:", "response:"):
+        if text.startswith(prefix):
+            text = text[len(prefix):].strip()
+
+    return text
+
+
+def answer_question(question):
+    question = str(question).strip()
+
+    if not question:
         return {
-            "answer": "I could not find relevant information in the knowledge base.",
+            "answer": "Please enter a legal question.",
             "sources": [],
         }
 
-    if is_stolen_phone_question(question):
+    try:
+        sources = search_similar_chunks(
+            question,
+            top_k=RETRIEVAL_TOP_K,
+        )
+
+        print("\n========== RETRIEVAL RESULTS ==========")
+        for i, source in enumerate(sources, 1):
+            print(
+                f"{i}. Score: {source.get('score')} | "
+                f"Source: {source.get('source')} | "
+                f"Page: {source.get('page')}"
+            )
+        print("========================================\n")
+
+    except Exception as error:
+        print(f"Retrieval error: {error}")
         return {
-            "answer": answer_stolen_phone(sources),
+            "answer": "There was an error while searching the legal knowledge base.",
+            "sources": [],
+        }
+
+    if not sources:
+        return {
+            "answer": "I could not find relevant information in the legal knowledge base.",
+            "sources": [],
+        }
+
+    try:
+        best_score = float(sources[0].get("score", 0))
+    except (TypeError, ValueError):
+        best_score = 0
+
+    if best_score < RELEVANCE_THRESHOLD:
+        return {
+            "answer": (
+                "I could not find sufficiently relevant information "
+                "in the legal knowledge base to answer this question reliably."
+            ),
             "sources": sources,
         }
 
-    prompt = make_prompt(question, sources)
+    model_sources = sources[:MODEL_CONTEXT_CHUNKS]
+    messages = build_prompt(question, model_sources)
 
     try:
-        model = get_answer_model()
-        result = model(prompt, max_new_tokens=300, do_sample=False)
-        answer = result[0]["generated_text"].strip()
-        # Add disclaimer only to successfully generated answers
-        disclaimer = "\n\nThis is general legal information only and not professional legal advice."
-        answer += disclaimer
-    except Exception as e:
-        # If the model fails, provide a fallback message
-        print(f"Error generating answer with model: {e}")
+        tokenizer, model = get_answer_model()
+
+        prompt = tokenizer.apply_chat_template(
+            messages,
+            tokenize=False,
+            add_generation_prompt=True,
+        )
+
+        inputs = tokenizer(
+            prompt,
+            return_tensors="pt",
+            truncation=True,
+            max_length=4096,
+        )
+
+        outputs = model.generate(
+            **inputs,
+            max_new_tokens=300,
+            do_sample=False,
+            repetition_penalty=1.08,
+            no_repeat_ngram_size=3,
+            pad_token_id=tokenizer.eos_token_id,
+        )
+
+        generated = outputs[0][inputs["input_ids"].shape[1]:]
+
+        answer = clean_answer(
+            tokenizer.decode(
+                generated,
+                skip_special_tokens=True,
+            )
+        )
+
+        if not answer:
+            raise RuntimeError("Empty model response.")
+
+    except Exception as error:
+        print(f"Generation error: {error}")
         answer = (
-            "I found relevant legal text, but the answer model could not generate a full response. "
-            "Please read the sources shown below."
+            "I found relevant legal information, but I could not "
+            "generate a reliable answer."
         )
 
     return {
