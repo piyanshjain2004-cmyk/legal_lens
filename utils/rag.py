@@ -2,20 +2,28 @@ from functools import lru_cache
 
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
-from utils.settings import ANSWER_MODEL_FOLDER, ANSWER_MODEL_NAME, setup_environment
+from utils.settings import (
+    ANSWER_MODEL_FOLDER,
+    ANSWER_MODEL_NAME,
+    setup_environment,
+)
 from utils.vector_store import search_similar_chunks
 
 setup_environment()
 
 RELEVANCE_THRESHOLD = 0.35
 RETRIEVAL_TOP_K = 10
-MODEL_CONTEXT_CHUNKS = 3
-MAX_CHUNK_CHARS = 900
+MODEL_CONTEXT_CHUNKS = 5
+MAX_CHUNK_CHARS = 1200
 
 
 @lru_cache(maxsize=1)
 def get_answer_model():
-    model_path = ANSWER_MODEL_FOLDER if ANSWER_MODEL_FOLDER.exists() else ANSWER_MODEL_NAME
+    model_path = (
+        ANSWER_MODEL_FOLDER
+        if ANSWER_MODEL_FOLDER.exists()
+        else ANSWER_MODEL_NAME
+    )
 
     tokenizer = AutoTokenizer.from_pretrained(
         str(model_path),
@@ -31,7 +39,7 @@ def get_answer_model():
 
 
 def prepare_context(sources):
-    context = []
+    parts = []
 
     for source in sources:
         text = str(source.get("text", "")).strip()
@@ -41,38 +49,54 @@ def prepare_context(sources):
 
         if len(text) > MAX_CHUNK_CHARS:
             text = text[:MAX_CHUNK_CHARS]
-            last_period = text.rfind(".")
 
-            if last_period >= MAX_CHUNK_CHARS * 0.5:
+            last_period = text.rfind(".")
+            if last_period > MAX_CHUNK_CHARS // 2:
                 text = text[:last_period + 1]
 
-        context.append(text)
+        parts.append(text)
 
-    return "\n\n".join(context)
+    return "\n\n".join(parts)
 
 
-def build_prompt(question, sources):
+def make_messages(question, sources):
     context = prepare_context(sources)
 
+    system_message = """
+You are Legal Lens, an Indian law information assistant.
+
+Answer the user's question using ONLY the legal context provided.
+
+Rules:
+- Give a direct and complete legal explanation.
+- Use the actual rules, procedures and sections found in the context.
+- Explain what the law means in practical terms.
+- Distinguish between ownership/title and possession when relevant.
+- Mention section numbers only when they appear in the context.
+- Do not invent laws, sections, procedures, authorities or facts.
+- Do not recommend consulting a lawyer unless the user specifically asks
+  whether they should consult one.
+- Do not recommend filing a police complaint unless the provided context
+  specifically supports that step.
+- Do not give generic disclaimers or filler.
+- Do not mention sources, pages, scores, documents or retrieval.
+- Do not reproduce the legal text word-for-word.
+- If the context does not contain enough information, say so clearly.
+""".strip()
+
+    user_message = f"""
+Legal context:
+{context}
+
+Question:
+{question}
+
+Give the best answer supported by the legal context.
+""".strip()
+
     return [
-        {
-            "role": "system",
-            "content": (
-                "You are a legal information assistant specializing in Indian law. "
-                "Answer the user's question using only the provided legal context. "
-                "Do not invent laws, sections, procedures, penalties, facts, or legal "
-                "advice. If the context does not contain enough information, say so. "
-                "Give a direct, clear and complete answer in natural language. "
-                "Mention section numbers only when supported by the context. "
-                "Do not mention sources, pages, scores, documents, or retrieval. "
-                "Do not copy the context word-for-word. "
-                "This is general legal information, not professional legal advice."
-            ),
-        },
-        {
-            "role": "user",
-            "content": f"Legal context:\n{context}\n\nQuestion:\n{question}",
-        },
+        {"role": "system", "content": system_message},
+        {"role": "user", "content": user_message},
     ]
 
 
@@ -100,16 +124,6 @@ def answer_question(question):
             question,
             top_k=RETRIEVAL_TOP_K,
         )
-
-        print("\n========== RETRIEVAL RESULTS ==========")
-        for i, source in enumerate(sources, 1):
-            print(
-                f"{i}. Score: {source.get('score')} | "
-                f"Source: {source.get('source')} | "
-                f"Page: {source.get('page')}"
-            )
-        print("========================================\n")
-
     except Exception as error:
         print(f"Retrieval error: {error}")
         return {
@@ -130,18 +144,17 @@ def answer_question(question):
 
     if best_score < RELEVANCE_THRESHOLD:
         return {
-            "answer": (
-                "I could not find sufficiently relevant information "
-                "in the legal knowledge base to answer this question reliably."
-            ),
+            "answer": "I could not find sufficiently relevant information in the legal knowledge base to answer this question reliably.",
             "sources": sources,
         }
 
-    model_sources = sources[:MODEL_CONTEXT_CHUNKS]
-    messages = build_prompt(question, model_sources)
-
     try:
         tokenizer, model = get_answer_model()
+
+        messages = make_messages(
+            question,
+            sources[:MODEL_CONTEXT_CHUNKS],
+        )
 
         prompt = tokenizer.apply_chat_template(
             messages,
@@ -158,7 +171,7 @@ def answer_question(question):
 
         outputs = model.generate(
             **inputs,
-            max_new_tokens=300,
+            max_new_tokens=350,
             do_sample=False,
             repetition_penalty=1.08,
             no_repeat_ngram_size=3,
@@ -180,8 +193,8 @@ def answer_question(question):
     except Exception as error:
         print(f"Generation error: {error}")
         answer = (
-            "I found relevant legal information, but I could not "
-            "generate a reliable answer."
+            "I found relevant legal information, but "
+            "the answer could not be generated reliably."
         )
 
     return {
