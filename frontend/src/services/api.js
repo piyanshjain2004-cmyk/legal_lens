@@ -6,7 +6,37 @@ export async function askQuestion(question) {
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ question }),
+    body: JSON.stringify({
+      question: question.trim(),
+    }),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok || !data.success) {
+    throw new Error(data.message || "Something went wrong");
+  }
+
+  return data;
+}
+
+export async function buildKnowledgeBase() {
+  const response = await fetch(`${API_URL}/build`, {
+    method: "POST",
+  });
+
+  const data = await response.json();
+
+  if (!response.ok || !data.success) {
+    throw new Error(data.message || "Something went wrong");
+  }
+
+  return data;
+}
+
+export async function rebuildKnowledgeBase() {
+  const response = await fetch(`${API_URL}/rebuild`, {
+    method: "POST",
   });
 
   const data = await response.json();

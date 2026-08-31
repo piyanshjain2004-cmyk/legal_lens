@@ -1,5 +1,4 @@
 from flask import Flask, jsonify, request
-from flask_cors import CORS
 
 from utils.rag import answer_question
 from utils.vector_store import build_vector_store, rebuild_vector_store
@@ -8,7 +7,22 @@ from utils.settings import setup_environment
 setup_environment()
 
 app = Flask(__name__)
-CORS(app)
+
+
+@app.after_request
+def add_cors_headers(response):
+    origin = request.headers.get("Origin", "")
+    allowed_origins = {
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+    }
+
+    if origin in allowed_origins:
+        response.headers["Access-Control-Allow-Origin"] = origin
+
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
+    return response
 
 
 @app.route("/build", methods=["POST"])

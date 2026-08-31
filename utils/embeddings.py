@@ -1,5 +1,8 @@
 from functools import lru_cache
 
+import numpy as np
+from sentence_transformers import SentenceTransformer
+
 from utils.settings import (
     EMBEDDING_MODEL_FOLDER,
     EMBEDDING_MODEL_NAME,
@@ -7,9 +10,6 @@ from utils.settings import (
 )
 
 setup_environment()
-
-import numpy as np
-from sentence_transformers import SentenceTransformer
 
 
 @lru_cache(maxsize=1)

@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import "./hero.css";
 
-function hero() {
+function Hero() {
   const [question, setQuestion] = useState("");
   const navigate = useNavigate();
 
@@ -21,40 +21,51 @@ function hero() {
 
   return (
     <section className="hero">
-      <div className="hero-badge">
-        INDIAN LAW AI ASSISTANT
+      <div className="hero-content">
+        <div className="hero-badge">Indian Law RAG Assistant</div>
+
+        <h1>
+          Legal Lens helps you understand Indian laws in simple language.
+        </h1>
+
+        <p className="hero-description">
+          Ask a question, search your legal PDF knowledge base, and read an
+          answer with matched source sections.
+        </p>
+
+        <form className="hero-search" onSubmit={handleSubmit}>
+          <input
+            type="text"
+            value={question}
+            onChange={(e) => setQuestion(e.target.value)}
+            placeholder="Ask about consumer rights, theft, RTI, marriage law..."
+          />
+
+          <button type="submit">Ask</button>
+        </form>
+
+        <div className="hero-actions">
+          <Link to="/chat">Open Chat</Link>
+          <Link to="/resources">Useful Legal Links</Link>
+        </div>
       </div>
 
-      <h1>
-        Understand Indian Law.
-        <br />
-        <span>Simply.</span>
-      </h1>
+      <div className="hero-panel">
+        <p className="panel-label">Project Flow</p>
 
-      <p className="hero-description">
-        Ask questions about Indian law and get clear,
-        easy-to-understand answers powered by AI and
-        your legal knowledge base.
-      </p>
+        <div>Question</div>
+        <span></span>
 
-      <form className="hero-search" onSubmit={handleSubmit}>
-        <input
-          type="text"
-          value={question}
-          onChange={(e) => setQuestion(e.target.value)}
-          placeholder="Ask a legal question..."
-        />
+        <div>PDF Search</div>
+        <span></span>
 
-        <button type="submit">
-          Ask
-        </button>
-      </form>
+        <div>AI Answer</div>
+        <span></span>
 
-      <p className="hero-hint">
-        Example: What should I do if someone claims my property?
-      </p>
+        <div>Sources</div>
+      </div>
     </section>
   );
 }
 
-export default hero;
+export default Hero;

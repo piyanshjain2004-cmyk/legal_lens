@@ -21,10 +21,6 @@ VERSION_FILE = VECTOR_FOLDER / "version.txt"
 INDEX_VERSION = "2"
 
 
-# ---------------------------------------------------------
-# Build vector store
-# ---------------------------------------------------------
-
 def build_vector_store() -> int:
 
     if (
@@ -49,10 +45,6 @@ def build_vector_store() -> int:
 
     return rebuild_vector_store()
 
-
-# ---------------------------------------------------------
-# Rebuild vector store
-# ---------------------------------------------------------
 
 def rebuild_vector_store() -> int:
 
@@ -112,10 +104,6 @@ def rebuild_vector_store() -> int:
     return len(chunks)
 
 
-# ---------------------------------------------------------
-# Chunk count
-# ---------------------------------------------------------
-
 def get_chunk_count() -> int:
 
     if not CHUNKS_FILE.exists():
@@ -128,10 +116,6 @@ def get_chunk_count() -> int:
 
         return len(json.load(file))
 
-
-# ---------------------------------------------------------
-# Load vector store
-# ---------------------------------------------------------
 
 def load_vector_store():
 
@@ -159,17 +143,12 @@ def load_vector_store():
     return index, chunks
 
 
-# ---------------------------------------------------------
-# Query expansion
-# ---------------------------------------------------------
-
 def expand_legal_query(question: str) -> str:
 
     question_lower = question.lower()
 
     expansion_terms = []
 
-    # Property ownership / possession
     if (
         "property" in question_lower
         or "land" in question_lower
@@ -189,7 +168,6 @@ def expand_legal_query(question: str) -> str:
             ]
         )
 
-    # Claim / objection
     if (
         "claim" in question_lower
         or "claims" in question_lower
@@ -206,7 +184,6 @@ def expand_legal_query(question: str) -> str:
             ]
         )
 
-    # Attachment
     if (
         "attach" in question_lower
         or "attachment" in question_lower
@@ -219,7 +196,6 @@ def expand_legal_query(question: str) -> str:
             ]
         )
 
-    # Possession
     if (
         "possession" in question_lower
         or "possess" in question_lower
@@ -233,7 +209,6 @@ def expand_legal_query(question: str) -> str:
             ]
         )
 
-    # Remove duplicate terms while preserving order
     unique_terms = []
 
     for term in expansion_terms:
@@ -251,10 +226,6 @@ def expand_legal_query(question: str) -> str:
     )
 
 
-# ---------------------------------------------------------
-# Search similar chunks
-# ---------------------------------------------------------
-
 def search_similar_chunks(
     question: str,
     top_k: int = 5,
@@ -262,27 +233,9 @@ def search_similar_chunks(
 
     index, chunks = load_vector_store()
 
-    # -----------------------------------------------------
-    # Expand the user's natural-language question
-    # -----------------------------------------------------
-
     search_query = expand_legal_query(
         question
     )
-
-    print(
-        "\n========== SEARCH QUERY =========="
-    )
-
-    print(search_query)
-
-    print(
-        "==================================\n"
-    )
-
-    # -----------------------------------------------------
-    # Create question embedding
-    # -----------------------------------------------------
 
     question_embedding = np.array(
         [
@@ -293,20 +246,12 @@ def search_similar_chunks(
         dtype="float32",
     )
 
-    # -----------------------------------------------------
-    # FAISS search
-    # -----------------------------------------------------
-
     scores, positions = index.search(
         question_embedding,
         top_k,
     )
 
     results: list[dict[str, str]] = []
-
-    # -----------------------------------------------------
-    # Convert FAISS results
-    # -----------------------------------------------------
 
     for score, position in zip(
         scores[0],

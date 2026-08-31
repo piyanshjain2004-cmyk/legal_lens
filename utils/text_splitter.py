@@ -6,21 +6,10 @@ CHUNK_OVERLAP = 150
 
 
 def clean_text(text: str) -> str:
-    """
-    Clean extracted PDF text while preserving useful paragraph
-    and section boundaries.
-    """
-
     text = text.replace("\r\n", "\n")
     text = text.replace("\r", "\n")
-
-    # Remove repeated underscores often produced by PDF extraction.
     text = re.sub(r"_{3,}", " ", text)
-
-    # Normalize spaces/tabs but preserve newlines.
     text = re.sub(r"[ \t]+", " ", text)
-
-    # Remove excessive blank lines.
     text = re.sub(r"\n{3,}", "\n\n", text)
 
     return text.strip()
@@ -46,7 +35,6 @@ def split_text(
     if not cleaned_text:
         return []
 
-    # Split into sentences while keeping legal text readable.
     sentences = re.split(
         r"(?<=[.!?])\s+",
         cleaned_text,
@@ -65,8 +53,6 @@ def split_text(
 
         sentence_length = len(sentence)
 
-        # If adding this sentence would exceed the chunk size,
-        # finalize the current chunk first.
         if (
             current_sentences
             and current_length + sentence_length + 1 > chunk_size
@@ -76,7 +62,6 @@ def split_text(
             if chunk:
                 chunks.append(chunk)
 
-            # Keep the last few sentences as overlap.
             overlap_sentences: list[str] = []
             overlap_length = 0
 
@@ -94,7 +79,6 @@ def split_text(
         current_sentences.append(sentence)
         current_length += sentence_length + 1
 
-    # Add remaining text.
     if current_sentences:
 
         chunk = " ".join(current_sentences).strip()

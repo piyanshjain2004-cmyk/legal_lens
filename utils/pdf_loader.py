@@ -38,7 +38,6 @@ def load_pdfs_from_folder(
 ) -> list[dict[str, str | int]]:
 
     folder = Path(folder_path)
-    #(subfolder search)
     pdf_files = sorted(folder.rglob("*.pdf"))
 
     all_pages: list[dict[str, str | int]] = []

@@ -18,7 +18,7 @@ const steps = [
   },
 ];
 
-function how_it_works() {
+function HowItWorks() {
   return (
     <section className="how-it-works">
       <h2>How Legal Lens Works</h2>
@@ -38,4 +38,4 @@ function how_it_works() {
   );
 }
 
-export default how_it_works;
+export default HowItWorks;
