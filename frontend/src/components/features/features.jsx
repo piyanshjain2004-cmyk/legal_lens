@@ -2,22 +2,22 @@ import "./features.css";
 
 const featureData = [
   {
-    title: "Ask Legal Questions",
+    title: "Question to Context",
     description:
-      "Ask questions about Indian law in simple language and get clear answers.",
-    icon: "⚖️",
+      "Turns a natural legal question into a search query for your Indian law PDFs.",
+    icon: "01",
   },
   {
-    title: "Law-Based Answers",
+    title: "Grounded Drafting",
     description:
-      "Get answers generated using the legal documents available in the knowledge base.",
-    icon: "📚",
+      "Uses retrieved provisions before generating an answer, keeping the response tied to documents.",
+    icon: "02",
   },
   {
-    title: "Simple Explanations",
+    title: "Source Review",
     description:
-      "Complex legal concepts are explained in an easy-to-understand way.",
-    icon: "💡",
+      "Shows matched document names and sections so the answer can be checked during evaluation.",
+    icon: "03",
   },
 ];
 
@@ -29,14 +29,13 @@ function Features() {
           <span className="section-label">FEATURES</span>
 
           <h2>
-            Legal information,
+            Designed for a clear
             <br />
-            made <span>simple.</span>
+            project demonstration.
           </h2>
 
           <p>
-            Legal Lens helps you understand Indian law without having to
-            search through hundreds of pages of legal documents.
+            The interface keeps the workflow visible: ask, retrieve, answer and verify.
           </p>
         </div>
 

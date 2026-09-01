@@ -1,9 +1,7 @@
 .how-it-works {
   max-width: 1100px;
-  margin: auto;
-
-  padding: 80px 25px 110px;
-
+  margin: 0 auto;
+  padding: 76px 25px 96px;
   border-top: 1px solid #e5e5e5;
 }
 
@@ -12,7 +10,8 @@
 
   text-align: center;
   font-size: 32px;
-  letter-spacing: -1px;
+  color: #1f2933;
+  letter-spacing: 0;
 }
 
 .steps {
@@ -22,7 +21,7 @@
 }
 
 .step span {
-  color: #999;
+  color: #9b6a2f;
   font-size: 13px;
   font-weight: 700;
 }
@@ -34,7 +33,7 @@
 .step p {
   margin: 0;
 
-  color: #666;
+  color: #667085;
   font-size: 14px;
   line-height: 1.65;
 }

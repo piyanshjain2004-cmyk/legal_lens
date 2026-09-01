@@ -1,29 +1,24 @@
 .chat-page {
-  min-height: 100vh;
+  min-height: calc(100vh - 74px);
   display: grid;
   grid-template-columns: 280px 1fr;
-  background: #f7f7f8;
-  color: #202123;
+  background: #fffaf3;
+  color: #1f2933;
 }
 
 .chat-sidebar {
   padding: 26px;
   background: #ffffff;
-  border-right: 1px solid #e6e6e6;
+  border-right: 1px solid #eadfce;
 }
 
-.chat-logo {
-  display: inline-block;
-  margin-bottom: 28px;
-  color: #171717;
-  text-decoration: none;
-  font-size: 24px;
+.chat-side-label {
+  margin: 0 0 18px;
+  color: #9b6a2f;
+  font-size: 13px;
   font-weight: 700;
-}
-
-.chat-logo span {
-  color: #777;
-  font-weight: 400;
+  letter-spacing: 1px;
+  text-transform: uppercase;
 }
 
 .chat-sidebar button {
@@ -32,19 +27,19 @@
   padding: 12px 14px;
   border: 0;
   border-radius: 8px;
-  background: #171717;
+  background: #1f2933;
   color: #ffffff;
   cursor: pointer;
   font-size: 14px;
 }
 
 .chat-sidebar button:hover {
-  background: #333333;
+  background: #344054;
 }
 
 .chat-status {
   margin-top: 14px;
-  color: #666666;
+  color: #667085;
   font-size: 14px;
   line-height: 1.5;
 }
@@ -57,8 +52,8 @@
 
 .chat-top {
   padding: 24px 34px;
-  background: #ffffff;
-  border-bottom: 1px solid #e6e6e6;
+  background: #fffdf9;
+  border-bottom: 1px solid #eadfce;
 }
 
 .chat-top h1 {
@@ -68,7 +63,7 @@
 
 .chat-top p {
   margin: 0;
-  color: #666666;
+  color: #667085;
 }
 
 .chat-messages {
@@ -79,7 +74,7 @@
 .empty-chat {
   max-width: 760px;
   margin: 18vh auto 0;
-  color: #777777;
+  color: #667085;
   text-align: center;
   font-size: 18px;
 }
@@ -88,19 +83,19 @@
   max-width: 860px;
   margin-bottom: 18px;
   padding: 18px;
-  border-radius: 10px;
+  border-radius: 8px;
   line-height: 1.6;
 }
 
 .chat-message.user {
   margin-left: auto;
-  background: #171717;
+  background: #1f2933;
   color: #ffffff;
 }
 
 .chat-message.assistant {
   background: #ffffff;
-  border: 1px solid #e2e2e2;
+  border: 1px solid #eadfce;
 }
 
 .message-name {
@@ -121,7 +116,7 @@
   padding: 10px 12px;
   border: 1px solid #e5e5e5;
   border-radius: 8px;
-  background: #fafafa;
+  background: #fffaf3;
 }
 
 .source-list summary {
@@ -131,7 +126,7 @@
 
 .source-list p {
   margin: 10px 0 0;
-  color: #555555;
+  color: #667085;
   font-size: 14px;
 }
 
@@ -139,8 +134,8 @@
   display: flex;
   gap: 12px;
   padding: 18px 34px 24px;
-  background: #ffffff;
-  border-top: 1px solid #e6e6e6;
+  background: #fffdf9;
+  border-top: 1px solid #eadfce;
 }
 
 .chat-form textarea {
@@ -156,7 +151,7 @@
   width: 84px;
   border: 0;
   border-radius: 8px;
-  background: #171717;
+  background: #1f2933;
   color: #ffffff;
   cursor: pointer;
 }

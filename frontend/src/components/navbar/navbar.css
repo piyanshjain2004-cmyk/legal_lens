@@ -1,23 +1,27 @@
 .navbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
   height: 72px;
   padding: 0 7%;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 1px solid #e8e8e8;
-  background: #ffffff;
+  border-bottom: 1px solid #eadfce;
+  background: rgba(255, 252, 247, 0.94);
+  backdrop-filter: blur(14px);
 }
 
 .navbar-logo {
   text-decoration: none;
-  color: #171717;
+  color: #1f2933;
   font-size: 24px;
   font-weight: 700;
-  letter-spacing: -1px;
+  letter-spacing: 0;
 }
 
 .navbar-logo span {
-  color: #777;
+  color: #9b6a2f;
   font-weight: 400;
 }
 
@@ -28,18 +32,19 @@
 
 .navbar-links a {
   text-decoration: none;
-  color: #666;
+  color: #667085;
   font-size: 14px;
+  font-weight: 600;
 }
 
 .navbar-links a:hover,
 .navbar-links .active {
-  color: #171717;
+  color: #9b6a2f;
 }
 
 .navbar-button {
   text-decoration: none;
-  background: #171717;
+  background: #1f2933;
   color: #ffffff;
   padding: 10px 16px;
   border-radius: 8px;

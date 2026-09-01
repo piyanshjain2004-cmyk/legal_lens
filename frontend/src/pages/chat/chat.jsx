@@ -1,17 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
 
 import { askQuestion, buildKnowledgeBase, rebuildKnowledgeBase } from "../../services/api";
+import Navbar from "../../components/navbar/navbar";
 import "./chat.css";
 
 function Chat() {
-  const location = useLocation();
-  const firstQuestion = location.state?.question || "";
   const [question, setQuestion] = useState("");
   const [messages, setMessages] = useState([]);
   const [status, setStatus] = useState("");
   const [loading, setLoading] = useState(false);
-  const firstQuestionSent = useRef(false);
   const messagesEnd = useRef(null);
 
   const sendQuestion = useCallback(async (text) => {
@@ -57,15 +54,6 @@ function Chat() {
     messagesEnd.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
 
-  useEffect(() => {
-    if (!firstQuestion || firstQuestionSent.current) {
-      return;
-    }
-
-    firstQuestionSent.current = true;
-    sendQuestion(firstQuestion);
-  }, [firstQuestion, sendQuestion]);
-
   async function handleBuild() {
     setStatus("Preparing knowledge base...");
 
@@ -94,29 +82,27 @@ function Chat() {
   }
 
   return (
-    <main className="chat-page">
-      <aside className="chat-sidebar">
-        <Link to="/" className="chat-logo">
-          Legal<span>Lens</span>
-        </Link>
+    <>
+      <Navbar />
+      <main className="chat-page">
+        <aside className="chat-sidebar">
+          <p className="chat-side-label">Knowledge Base</p>
+          <button onClick={handleBuild}>Use Saved Index</button>
+          <button onClick={handleRebuild}>Refresh Index</button>
+          <button onClick={() => setMessages([])}>Clear Conversation</button>
+          {status && <p className="chat-status">{status}</p>}
+        </aside>
 
-        <button onClick={handleBuild}>Build Knowledge Base</button>
-        <button onClick={handleRebuild}>Rebuild Knowledge Base</button>
-        <button onClick={() => setMessages([])}>Clear Chat</button>
-
-        {status && <p className="chat-status">{status}</p>}
-      </aside>
-
-      <section className="chat-panel">
+        <section className="chat-panel">
         <header className="chat-top">
-          <h1>Ask Legal Lens</h1>
-          <p>General Indian law information based on your PDF knowledge base.</p>
+          <h1>Legal Query Workspace</h1>
+          <p>Ask questions grounded in the Indian law documents stored in your project.</p>
         </header>
 
         <div className="chat-messages">
           {messages.length === 0 && (
             <div className="empty-chat">
-              Ask a legal question to start.
+              Start with a specific legal situation, Act name or right you want to understand.
             </div>
           )}
 
@@ -145,7 +131,7 @@ function Chat() {
           {loading && (
             <article className="chat-message assistant">
               <div className="message-name">Legal Lens</div>
-              <div className="message-text">Searching legal documents...</div>
+              <div className="message-text">Retrieving legal context...</div>
             </article>
           )}
 
@@ -160,11 +146,12 @@ function Chat() {
             rows="2"
           />
           <button type="submit" disabled={loading || !question.trim()}>
-            Ask
+            Send
           </button>
         </form>
       </section>
-    </main>
+      </main>
+    </>
   );
 }
 
