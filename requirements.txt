@@ -1,0 +1,10 @@
+Flask
+flask-cors
+faiss-cpu
+numpy
+pypdf
+sentence-transformers
+transformers
+torch
+accelerate
+safetensors
