@@ -6,55 +6,64 @@ function Hero() {
   return (
     <section className="hero">
       <div className="hero-content">
-        <div className="hero-badge">Indian Law AI Assistant</div>
+        <div className="hero-badge">Professional Legal Intelligence</div>
 
         <h1>
-          Understand Indian laws through source-backed AI assistance.
+          Research Indian Law with Context-Aware AI.
         </h1>
 
         <p className="hero-description">
-          Legal Lens turns selected Indian law PDFs into a searchable knowledge base, then explains relevant provisions in clean, practical language.
+          Legal Lens helps you search statutory material, review relevant excerpts and generate grounded legal information with a clear source trail.
         </p>
 
         <div className="hero-actions">
-          <Link to="/chat" className="primary-action">Start Legal Query</Link>
-          <Link to="/resources">Explore References</Link>
+          <Link to="/chat" className="primary-action">Open Assistant</Link>
+          <Link to="/resources">Browse Authorities</Link>
         </div>
 
         <div className="hero-stats">
           <div>
-            <strong>RAG</strong>
-            <span>Retrieval-based answers</span>
+            <strong>10,000+</strong>
+            <span>Documents Indexed</span>
           </div>
           <div>
             <strong>FAISS</strong>
-            <span>Fast document search</span>
+            <span>Sub-second Search</span>
           </div>
           <div>
-            <strong>Local</strong>
-            <span>No paid APIs</span>
+            <strong>Secure</strong>
+            <span>Local Processing</span>
           </div>
         </div>
       </div>
 
       <div className="hero-panel">
         <div className="panel-top">
-          <p className="panel-label">Case Brief</p>
-          <span>Demo</span>
+          <p className="panel-label">Research Workflow</p>
+          <span>Source-led</span>
         </div>
 
-        <h3>What happens inside?</h3>
+        <h3>From query to grounded response</h3>
 
-        <div className="flow-item">Legal Question</div>
+        <div className="flow-item">User Query Analysis</div>
         <span></span>
 
-        <div className="flow-item">Document Retrieval</div>
+        <div className="flow-item">Retrieval (Acts & Precedents)</div>
         <span></span>
 
-        <div className="flow-item">Grounded Response</div>
+        <div className="flow-item">Plain-language Generation</div>
         <span></span>
 
-        <div className="flow-item">Source Review</div>
+        <div className="flow-item">Verification via Citations</div>
+      </div>
+
+      <div className="topic-bubbles">
+        <span>Constitution</span>
+        <span>Criminal Law</span>
+        <span>Consumer Rights</span>
+        <span>RTI</span>
+        <span>Cyber Law</span>
+        <span>Tax Law</span>
       </div>
     </section>
   );
