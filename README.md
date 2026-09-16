@@ -1,171 +1,128 @@
-# AI Legal Assistant for Indian Laws
+<div align="center">
+  <img src="frontend/public/vite.svg" alt="Logo" width="80" height="80">
+  <h1 align="center">Legal Lens</h1>
+  <p align="center">
+    <strong>Advanced Intelligence for the Indian Legal Framework</strong>
+    <br />
+    A completely open-source, fast, and highly accurate AI Legal Assistant powered by Retrieval-Augmented Generation (RAG).
+    <br />
+    <br />
+    <a href="#-features">Features</a> ·
+    <a href="#-tech-stack">Tech Stack</a> ·
+    <a href="#-quick-start">Quick Start</a>
+  </p>
+</div>
 
-## Goal
+---
 
-Build a simple, clean, beginner-friendly AI Legal Assistant for Indian laws. This is a final-year college project, so prioritize readability, maintainability, and clear explanations over enterprise-level architecture.
+## ⚖️ About Legal Lens
 
-## Tech Stack
+**Legal Lens** bridges the gap between complex legal documents and accessible insights. It is a powerful, privacy-first AI workspace built specifically to answer queries regarding Indian Laws, statutory materials, and precedents. 
 
-* Python 3.12+
-* Flask
-* Sentence Transformers
-* FAISS
-* PyMuPDF
-* Transformers (Hugging Face)
-* SQLite (only if chat history is needed)
+Instead of generating answers out of thin air, Legal Lens uses **local vector search (FAISS)** to retrieve exact legal provisions, and a local language model to draft clear, plain-language answers. Best of all? **Every claim is backed by exact source citations**, allowing users to independently verify the information.
 
-Do NOT use:
+*Perfect for law students, researchers, and legal professionals looking to streamline their research workflow.*
 
-* Docker
-* Kubernetes
-* Redis
-* RabbitMQ
-* LangGraph
-* Microservices
-* Cloud services
-* Paid APIs
+---
 
-## Features
+## ✨ Features
 
-### Phase 1
+- 🔍 **Semantic Legal Search**: Interprets natural-language queries without the limitations of traditional keyword-matching.
+- 📝 **Grounded Legal Drafting**: Generates precise responses derived exclusively from a vetted, local knowledge base to prevent AI hallucination.
+- 📑 **Source Verification**: Maintains absolute transparency by citing exact sections, acts, and page numbers.
+- 🔒 **100% Privacy-First Architecture**: Built on local FAISS index and local models. Your sensitive queries never leave your secure environment.
+- ⚡ **Sleek UI**: Modern, responsive React frontend that feels like a premium SaaS product.
 
-* Chat interface
-* User asks legal questions
-* Search Indian law documents
-* Generate answer using RAG
-* Show sources used
+---
 
-### Phase 2
+## 🛠 Tech Stack
 
-* PDF upload
-* Ask questions about uploaded PDF
-* Chat history
-* Dark mode
+**Frontend**
+- React 18 & Vite
+- Pure CSS (Custom variables, responsive grids, native styling)
+- React Router DOM
 
-## Folder Structure
+**Backend (Python)**
+- Flask
+- Sentence Transformers (Hugging Face)
+- FAISS (Facebook AI Similarity Search)
+- PyMuPDF (Document parsing)
 
-legal-assistant/
+---
 
-data/
+## 🚀 Quick Start (How to Run)
 
-* law_pdfs/
+Legal Lens is designed to be incredibly easy to set up. Follow these simple steps to get both the backend and frontend running on your local machine.
 
-vector_db/
+### Prerequisites
+- Python 3.12+
+- Node.js (v18+)
+- Git
 
-models/
-
-utils/
-
-* pdf_loader.py
-* text_splitter.py
-* embeddings.py
-* vector_store.py
-* rag.py
-
-app.py
-
-requirements.txt
-
-README.md
-
-## Workflow
-
-User Question
-
-↓
-
-Create Embedding
-
-↓
-
-Search FAISS
-
-↓
-
-Retrieve Top 5 Chunks
-
-↓
-
-Send Context + Question to LLM
-
-↓
-
-Generate Answer
-
-↓
-
-Display:
-
-* Answer
-* Source Sections
-* Source Document Name
-
-## UI
-
-Left Sidebar:
-
-* Upload PDF
-* Select Knowledge Base
-* Clear Chat
-
-Main Screen:
-
-* Chat Window
-* User Message
-* AI Response
-* Sources
-
-## Coding Guidelines
-
-* Use classes only where necessary.
-* Prefer simple functions.
-* Keep each file under 250 lines if possible.
-* Write clean variable names.
-* Add docstrings.
-* Add type hints.
-* Include error handling.
-* Display friendly error messages.
-
-## Documentation
-
-Create:
-
-* README.md
-* Installation guide
-* Folder explanation
-* Architecture diagram
-* Requirements.txt
-
-## Project Goal
-
-The assistant should answer general legal information questions related to Indian laws using Retrieval-Augmented Generation (RAG). It should provide informational guidance only, cite the legal source used, and clearly state that it is not a substitute for professional legal advice.
-
-Keep the code simple enough that a final-year student can understand every file and explain the project during a viva.
-
+### 1. Clone the repository
 ```bash
-pip install -r requirements.txt
+git clone https://github.com/piyanshjain2004-cmyk/legal_lens.git
+cd legal_lens
 ```
 
-## Folder Structure
+### 2. Start the Backend
+Open a terminal in the root folder (`legal_lens`):
+
+```bash
+# Install the required Python dependencies
+pip install -r requirements.txt
+
+# Start the Flask API server
+python app.py
+```
+*The backend server will start running on `http://localhost:5000`.*
+
+### 3. Start the Frontend
+Open a **new/second terminal** and navigate to the frontend folder:
+
+```bash
+cd frontend
+
+# Install Node dependencies
+npm install
+
+# Start the Vite development server
+npm run dev
+```
+*The frontend will be available at `http://localhost:5173`. Open this URL in your browser.*
+
+---
+
+## 🏗 Folder Architecture
 
 ```text
-legal-assistant/
-├── app.py
-├── requirements.txt
-├── README.md
-├── templates/
-│   └── index.html
-├── static/
-│   ├── style.css
-│   └── script.js
+legal_lens/
+├── app.py                 # Main Flask application
+├── requirements.txt       # Python dependencies
+├── frontend/              # React UI (Vite)
+│   ├── src/
+│   ├── package.json
+│   └── ...
 ├── data/
-│   └── law_pdfs/
-├── vector_db/
-├── models/
-└── utils/
-    ├── __init__.py
+│   └── law_pdfs/          # Place your legal PDF documents here
+├── vector_db/             # Local FAISS index storage
+├── models/                # Local Hugging Face models
+└── utils/                 # Core Python backend logic
     ├── pdf_loader.py
     ├── text_splitter.py
     ├── embeddings.py
     ├── vector_store.py
     └── rag.py
+```
+
+---
+
+## ⚠️ Important Disclaimer
+
+**Legal Lens** is intended for informational and research purposes only. The answers generated by the AI do not constitute professional legal advice. Users are strongly advised to consult certified legal practitioners before taking any legal actions.
+
+---
+
+<div align="center">
+  <i>Built by the community, for the community. If you find this useful, please ⭐ star the repository!</i>
+</div>
