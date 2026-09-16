@@ -1,5 +1,4 @@
 <div align="center">
-  <img src="frontend/public/vite.svg" alt="Logo" width="80" height="80">
   <h1 align="center">Legal Lens</h1>
   <p align="center">
     <strong>Advanced Intelligence for the Indian Legal Framework</strong>
@@ -7,50 +6,64 @@
     A completely open-source, fast, and highly accurate AI Legal Assistant powered by Retrieval-Augmented Generation (RAG).
     <br />
     <br />
-    <a href="#-features">Features</a> ·
-    <a href="#-tech-stack">Tech Stack</a> ·
-    <a href="#-quick-start">Quick Start</a>
+    <a href="#about-legal-lens">About</a> |
+    <a href="#features">Features</a> |
+    <a href="#architecture--workflow">Architecture</a> |
+    <a href="#tech-stack">Tech Stack</a> |
+    <a href="#quick-start">Quick Start</a>
   </p>
 </div>
 
 ---
 
-## ⚖️ About Legal Lens
+## About Legal Lens
 
-**Legal Lens** bridges the gap between complex legal documents and accessible insights. It is a powerful, privacy-first AI workspace built specifically to answer queries regarding Indian Laws, statutory materials, and precedents. 
+Legal Lens bridges the gap between complex legal documents and accessible insights. It is a powerful, privacy-first AI workspace built specifically to answer queries regarding Indian Laws, statutory materials, and precedents. 
 
-Instead of generating answers out of thin air, Legal Lens uses **local vector search (FAISS)** to retrieve exact legal provisions, and a local language model to draft clear, plain-language answers. Best of all? **Every claim is backed by exact source citations**, allowing users to independently verify the information.
+Instead of generating answers out of thin air, Legal Lens uses local vector search (FAISS) to retrieve exact legal provisions, and a local language model to draft clear, plain-language answers. Every claim is backed by exact source citations, allowing users to independently verify the information.
 
-*Perfect for law students, researchers, and legal professionals looking to streamline their research workflow.*
-
----
-
-## ✨ Features
-
-- 🔍 **Semantic Legal Search**: Interprets natural-language queries without the limitations of traditional keyword-matching.
-- 📝 **Grounded Legal Drafting**: Generates precise responses derived exclusively from a vetted, local knowledge base to prevent AI hallucination.
-- 📑 **Source Verification**: Maintains absolute transparency by citing exact sections, acts, and page numbers.
-- 🔒 **100% Privacy-First Architecture**: Built on local FAISS index and local models. Your sensitive queries never leave your secure environment.
-- ⚡ **Sleek UI**: Modern, responsive React frontend that feels like a premium SaaS product.
+Perfect for law students, researchers, and legal professionals looking to streamline their research workflow.
 
 ---
 
-## 🛠 Tech Stack
+## Features
 
-**Frontend**
+- Semantic Legal Search: Interprets natural-language queries without the limitations of traditional keyword-matching.
+- Grounded Legal Drafting: Generates precise responses derived exclusively from a vetted, local knowledge base to prevent AI hallucination.
+- Source Verification: Maintains absolute transparency by citing exact sections, acts, and page numbers.
+- Privacy-First Architecture: Built on a local FAISS index and local embedding models. Your sensitive queries never leave your secure environment.
+- Sleek UI: Modern, responsive React frontend that feels like a premium SaaS product.
+
+---
+
+## Architecture & Workflow
+
+Legal Lens is built on a robust Retrieval-Augmented Generation (RAG) pipeline to ensure high accuracy and zero hallucination.
+
+1. Document Ingestion: Legal documents (PDFs) are loaded, split into semantic chunks, and converted into high-dimensional vector embeddings using local Hugging Face Sentence Transformers.
+2. Vector Indexing: The embeddings are stored in a local FAISS (Facebook AI Similarity Search) index for lightning-fast semantic retrieval.
+3. Query Processing: When a user submits a question via the React frontend, the Flask backend embeds the query and searches the FAISS index to find the most relevant legal context.
+4. LLM Generation: The retrieved legal provisions, along with the user's question, are passed to a local language model. The model synthesizes the context to generate a plain-language answer.
+5. Verification: The final response is delivered back to the React UI, accompanied by the exact source snippets and page numbers utilized during generation.
+
+---
+
+## Tech Stack
+
+Frontend
 - React 18 & Vite
 - Pure CSS (Custom variables, responsive grids, native styling)
 - React Router DOM
 
-**Backend (Python)**
-- Flask
-- Sentence Transformers (Hugging Face)
-- FAISS (Facebook AI Similarity Search)
-- PyMuPDF (Document parsing)
+Backend (Python)
+- Flask (RESTful API Server)
+- Sentence Transformers (Hugging Face Embedding Models)
+- FAISS (Local Vector Database)
+- PyMuPDF (High-performance document parsing)
 
 ---
 
-## 🚀 Quick Start (How to Run)
+## Quick Start (How to Run)
 
 Legal Lens is designed to be incredibly easy to set up. Follow these simple steps to get both the backend and frontend running on your local machine.
 
@@ -65,20 +78,23 @@ git clone https://github.com/piyanshjain2004-cmyk/legal_lens.git
 cd legal_lens
 ```
 
-### 2. Start the Backend
+### 2. Setup the Backend
 Open a terminal in the root folder (`legal_lens`):
 
 ```bash
 # Install the required Python dependencies
 pip install -r requirements.txt
 
+# Download the necessary local AI models
+python download_models.py
+
 # Start the Flask API server
 python app.py
 ```
-*The backend server will start running on `http://localhost:5000`.*
+The backend server will start running on `http://localhost:5000`.
 
 ### 3. Start the Frontend
-Open a **new/second terminal** and navigate to the frontend folder:
+Open a new/second terminal and navigate to the frontend folder:
 
 ```bash
 cd frontend
@@ -89,15 +105,16 @@ npm install
 # Start the Vite development server
 npm run dev
 ```
-*The frontend will be available at `http://localhost:5173`. Open this URL in your browser.*
+The frontend will be available at `http://localhost:5173`. Open this URL in your browser.
 
 ---
 
-## 🏗 Folder Architecture
+## Folder Architecture
 
 ```text
 legal_lens/
 ├── app.py                 # Main Flask application
+├── download_models.py     # Script to download local AI models
 ├── requirements.txt       # Python dependencies
 ├── frontend/              # React UI (Vite)
 │   ├── src/
@@ -117,12 +134,12 @@ legal_lens/
 
 ---
 
-## ⚠️ Important Disclaimer
+## Important Disclaimer
 
-**Legal Lens** is intended for informational and research purposes only. The answers generated by the AI do not constitute professional legal advice. Users are strongly advised to consult certified legal practitioners before taking any legal actions.
+Legal Lens is intended for informational and research purposes only. The answers generated by the AI do not constitute professional legal advice. Users are strongly advised to consult certified legal practitioners before taking any legal actions.
 
 ---
 
 <div align="center">
-  <i>Built by the community, for the community. If you find this useful, please ⭐ star the repository!</i>
+  <i>Built by the community, for the community. If you find this useful, please star the repository!</i>
 </div>
