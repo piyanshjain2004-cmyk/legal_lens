@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, NavLink } from "react-router-dom";
+import { Sun, Moon } from "lucide-react";
 
 import "./navbar.css";
 
@@ -52,10 +53,9 @@ function Navbar() {
         <button
           className="theme-toggle"
           onClick={toggleTheme}
-          aria-label="Toggle dark mode"
-          title={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
+          aria-label="Toggle theme"
         >
-          {isDarkMode ? "☀️" : "🌙"}
+          {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
         </button>
 
         <Link
