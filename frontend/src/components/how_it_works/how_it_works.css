@@ -23,7 +23,7 @@
 
 .step {
   padding: 30px;
-  background: #ffffff;
+  background: var(--panel);
   border-radius: 12px;
   border: 1px solid var(--line);
   transition: all 0.3s ease;
@@ -31,7 +31,7 @@
 
 .step:hover {
   transform: translateY(-4px);
-  box-shadow: 0 10px 30px rgba(16, 32, 51, 0.05);
+  box-shadow: var(--shadow);
   border-color: rgba(36, 87, 214, 0.2);
 }
 

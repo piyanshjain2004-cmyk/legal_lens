@@ -99,14 +99,14 @@
 }
 
 .badge {
-  background: #ffffff;
+  background: var(--panel);
   color: var(--blue);
   border: 1px solid var(--line);
   padding: 8px 16px;
   border-radius: 99px;
   font-size: 13px;
   font-weight: 600;
-  box-shadow: 0 4px 15px rgba(16, 32, 51, 0.03);
+  box-shadow: var(--shadow);
 }
 
 .open-source-banner {
@@ -118,14 +118,14 @@
   align-items: center;
   justify-content: space-between;
   gap: 30px;
-  box-shadow: 0 10px 30px rgba(16, 32, 51, 0.1);
-  color: #fff;
+  box-shadow: var(--shadow);
+  color: var(--surface);
 }
 
 .banner-content h2 {
   margin: 0 0 12px;
   font-size: 28px;
-  color: #fff;
+  color: var(--surface);
 }
 
 .banner-content p {
@@ -140,7 +140,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  background: #fff;
+  background: var(--panel);
   color: var(--ink);
   padding: 14px 28px;
   border-radius: 12px;
@@ -148,7 +148,7 @@
   text-decoration: none;
   white-space: nowrap;
   transition: all 0.2s ease;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow);
 }
 
 .github-btn:hover {
@@ -162,14 +162,17 @@
     gap: 16px;
     padding: 32px 0;
   }
+
   .page-hero h1 {
     font-size: 36px;
   }
+
   .open-source-banner {
     flex-direction: column;
     text-align: center;
     padding: 40px 20px;
   }
+
   .banner-content p {
     margin: 0 auto;
   }

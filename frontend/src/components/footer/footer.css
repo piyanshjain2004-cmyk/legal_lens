@@ -1,13 +1,14 @@
 .footer {
   padding: 48px 20px;
   border-top: 1px solid var(--line);
-  background: #ffffff;
+  background: var(--panel);
   text-align: center;
 }
 
 .footer-logo {
   font-size: 20px;
   font-weight: 700;
+  color: var(--ink);
 }
 
 .footer-logo span {
@@ -17,12 +18,12 @@
 
 .footer p {
   margin: 10px 0;
-
-  color: #666;
+  color: var(--muted);
   font-size: 13px;
 }
 
 .footer small {
-  color: #aaa;
+  color: var(--muted);
   font-size: 11px;
+  opacity: 0.7;
 }

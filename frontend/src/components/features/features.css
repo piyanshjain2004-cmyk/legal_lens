@@ -1,6 +1,6 @@
 .features {
   padding: 92px 7%;
-  background: #ffffff;
+  background: var(--panel);
 }
 
 .features-container {
@@ -48,7 +48,7 @@
   padding: 34px;
   border: 1px solid var(--line);
   border-radius: 12px;
-  background: #fff;
+  background: var(--panel);
   transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
   position: relative;
   overflow: hidden;

@@ -5,8 +5,8 @@
 body {
   margin: 0;
   font-family: Arial, sans-serif;
-  background: #f7f7f8;
-  color: #202123;
+  background: var(--surface);
+  color: var(--ink);
 }
 
 .app {
@@ -18,18 +18,19 @@ body {
 .header {
   padding: 22px;
   text-align: center;
-  border-bottom: 1px solid #ddd;
-  background: white;
+  border-bottom: 1px solid var(--line);
+  background: var(--panel);
 }
 
 .header h1 {
   margin: 0;
   font-size: 26px;
+  color: var(--ink);
 }
 
 .header p {
   margin: 6px 0 0;
-  color: #666;
+  color: var(--muted);
 }
 
 .chat-container {
@@ -48,10 +49,11 @@ body {
 .welcome h2 {
   font-size: 30px;
   margin-bottom: 10px;
+  color: var(--ink);
 }
 
 .welcome p {
-  color: #666;
+  color: var(--muted);
 }
 
 .message {
@@ -62,32 +64,37 @@ body {
 }
 
 .user-message {
-  background: #e9e9eb;
+  background: var(--blue-soft);
+  color: var(--ink);
 }
 
 .bot-message {
-  background: white;
-  border: 1px solid #e1e1e1;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  color: var(--ink);
 }
 
 .message-label {
   font-weight: bold;
   margin-bottom: 10px;
+  color: var(--ink);
 }
 
 .answer {
   white-space: pre-wrap;
+  color: var(--ink);
 }
 
 .loading {
-  color: #777;
+  color: var(--muted);
 }
 
 .error {
   padding: 15px;
   margin-top: 15px;
-  background: #ffe5e5;
-  color: #a00000;
+  background: rgba(220, 38, 38, 0.1);
+  color: #dc2626;
+  border: 1px solid rgba(220, 38, 38, 0.2);
   border-radius: 10px;
 }
 
@@ -104,24 +111,35 @@ body {
   flex: 1;
   resize: none;
   padding: 14px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--line);
   border-radius: 10px;
   font-size: 16px;
   outline: none;
+  background: var(--panel);
+  color: var(--ink);
+}
+
+.input-area textarea::placeholder {
+  color: var(--muted);
 }
 
 .input-area textarea:focus {
-  border-color: #777;
+  border-color: var(--blue);
 }
 
 .input-area button {
   width: 80px;
   border: none;
   border-radius: 10px;
-  background: #111;
-  color: white;
+  background: var(--navy);
+  color: #ffffff;
   font-size: 15px;
   cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.input-area button:hover:not(:disabled) {
+  background: var(--blue);
 }
 
 .input-area button:disabled {
